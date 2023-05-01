@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useMemo } from 'react';
 import { useLocalStorage } from 'hooks/useLocalStorage';
 import { ContactForm } from "./ContactForm/ContactForm";
 import { Filter } from "./Filter/Filter";
@@ -12,20 +12,6 @@ export const App = () => {
   const [contacts, setContacts] = useLocalStorage("contacts", []);
   const [filter, setFilter] = useState("");
 
-
-  // componentDidMount() {
-  //   const savedContacts = localStorage.getItem("contacts");
-  //   if (savedContacts !== null) {
-  //     this.setState({ contacts: JSON.parse(savedContacts) });
-  //   }
-  // }
-
-  // componentDidUpdate(prevProps, prevState) {
-  //   if (prevState.contacts !== this.state.contacts) {
-  //     localStorage.setItem("contacts", JSON.stringify(this.state.contacts));
-  //   }
-  // }
-
   const addContact = newContact => {
     contacts.some(contact => contact.name.toLowerCase() === newContact.name.toLowerCase())
       ? toast('This contact is already in your Phonebook!', { icon: '👻', })
@@ -36,16 +22,17 @@ export const App = () => {
     setContacts(prevState => prevState.filter(contact => contact.id !== contactId));
   };
 
-  // changeFilter = event => {
-  //   this.setState({ filter: event.target.value });
-  // };
+  const changeFilter = event => {
+    setFilter(prevState => event.target.value);
+    const normalizedSearch = filter.toLowerCase();
+    const searchContact = [...contacts];
+    return searchContact.filter(contact => contact.name.toLowerCase().includes(normalizedSearch));
+  };
 
-  // getSearchContact = () => {
-  //   const { filter, contacts } = this.state;
-  //   const normalizedSearch = filter.toLowerCase();
-  //   return contacts.filter(contact =>
-  //     contact.name.toLowerCase().includes(normalizedSearch));
-  // };
+  const searchContact = useMemo(() => {
+    const normalizedSearch = filter.toLowerCase();
+    return contacts.filter(contact => contact.name.toLowerCase().includes(normalizedSearch));
+  }, [contacts, filter]);
 
   return (
     <Layout>
@@ -53,14 +40,11 @@ export const App = () => {
         <h1>Phonebook</h1>
         <ContactForm onSubmit={addContact} />
         <h2>Contacts</h2>
-        <Filter value={filter} />
-        <ContactList contacts={contacts} onDeleteContact={deleteContact} />
+        <Filter value={filter} onChange={changeFilter} />
+        <ContactList contacts={searchContact} onDeleteContact={deleteContact} />
         <GlobalStyle />
         <Toaster position="top-center" />
       </Container>
     </Layout>
   )
 }
-
-// onChange={changeFilter}
-// onDeleteContact={deleteContact}
