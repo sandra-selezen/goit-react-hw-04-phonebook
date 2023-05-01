@@ -24,9 +24,6 @@ export const App = () => {
 
   const changeFilter = event => {
     setFilter(prevState => event.target.value);
-    const normalizedSearch = filter.toLowerCase();
-    const searchContact = [...contacts];
-    return searchContact.filter(contact => contact.name.toLowerCase().includes(normalizedSearch));
   };
 
   const searchContact = useMemo(() => {
